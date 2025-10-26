@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APK Download</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+        body { background: #0d1117; color: white; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; padding: 30px 0; }
+        .logo { font-size: 2.5rem; color: #58a6ff; margin-bottom: 10px; }
+        .apk-list { display: grid; gap: 15px; margin-top: 30px; }
+        .apk-card { 
+            background: #161b22; 
+            padding: 20px; 
+            border-radius: 10px;
+            border: 1px solid #30363d;
+        }
+        .apk-name { 
+            font-size: 1.3rem; 
+            color: #58a6ff; 
+            margin-bottom: 10px; 
+        }
+        .apk-info { color: #8b949e; margin-bottom: 15px; }
+        .download-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+        .download-btn:hover { background: #2ea043; }
+        .download-btn:disabled { background: #484f58; cursor: not-allowed; }
+        .status { text-align: center; margin: 10px 0; color: #8b949e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📱 APK DOWNLOAD</div>
+            <p>Simple APK Downloads - Bot Powered</p>
+        </div>
+        
+        <div class="apk-list" id="apkList">
+            <!-- APK list yahan aayegi -->
+        </div>
+    </div>
+
+    <script>
+        // Yeh data aapke bot se aayega
+        const apkData = [
+            {
+                id: "apk1",
+                name: "WhatsApp Plus",  // Bot se jo name aayega wahi dikhega
+                version: "2.22.25.80",
+                size: "45MB",
+                fileId: "bot_file_id_1"  // Bot ka file ID
+            },
+            {
+                id: "apk2", 
+                name: "YouTube ReVanced",
+                version: "18.15.40", 
+                size: "85MB",
+                fileId: "bot_file_id_2"
+            }
+        ];
+
+        // APK list show kare
+        function showApkList() {
+            const apkList = document.getElementById('apkList');
+            apkList.innerHTML = '';
+
+            apkData.forEach(apk => {
+                const card = document.createElement('div');
+                card.className = 'apk-card';
+                card.innerHTML = `
+                    <div class="apk-name">${apk.name}</div>
+                    <div class="apk-info">
+                        Version: ${apk.version} | Size: ${apk.size}
+                    </div>
+                    <div class="status" id="status-${apk.id}">Ready to download</div>
+                    <button class="download-btn" onclick="downloadApk('${apk.id}')" id="btn-${apk.id}">
+                        Download ${apk.name}
+                    </button>
+                `;
+                apkList.appendChild(card);
+            });
+        }
+
+        // Download function
+        async function downloadApk(apkId) {
+            const apk = apkData.find(a => a.id === apkId);
+            if (!apk) return;
+
+            const btn = document.getElementById(`btn-${apkId}`);
+            const status = document.getElementById(`status-${apkId}`);
+
+            btn.disabled = true;
+            btn.textContent = 'Downloading...';
+            status.textContent = 'Getting file from bot...';
+
+            try {
+                // Bot se file leke direct download kare
+                const downloadUrl = await getDownloadUrlFromBot(apk.fileId);
+                
+                // Direct download start kare
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `${apk.name}.apk`;  // Sirf apk name + .apk
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                status.textContent = 'Download complete!';
+                
+                // 3 second baad reset
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = `Download ${apk.name}`;
+                    status.textContent = 'Ready to download';
+                }, 3000);
+
+            } catch (error) {
+                status.textContent = 'Error: ' + error.message;
+                btn.disabled = false;
+                btn.textContent = `Download ${apk.name}`;
+            }
+        }
+
+        // Bot se download URL le (yeh aapko implement karna hoga)
+        async function getDownloadUrlFromBot(fileId) {
+            // Yahan aapka bot API call hoga
+            // Example:
+            const response = await fetch(`/api/get-file?fileId=${fileId}`);
+            const data = await response.json();
+            return data.downloadUrl;
+        }
+
+        // Start kare
+        showApkList();
+    </script>
+</body>
+</html>
